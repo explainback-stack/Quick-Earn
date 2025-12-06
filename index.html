@@ -127,6 +127,19 @@
     .home-balance h2{ color: #ff8aa3; } /* Lightened danger color for text */
     .home-balance .balance-amount{ color: var(--danger); font-size: 36px; }
 
+    /* Added style for Brown Balance (Telegram Screen) */
+    .brown-balance{
+        margin:16px; border-radius:20px; padding:18px 16px;
+        background:
+            radial-gradient(140% 140% at 0% 0%, rgba(139, 69, 19, .25), transparent 60%), 
+            radial-gradient(120% 120% at 100% 0%, rgba(165, 42, 42, .25), transparent 60%),
+            linear-gradient(180deg, #1c140d, #1a110a);
+        border:1px solid rgba(255,255,255,.08);
+    }
+    .brown-balance h2{ color: #e6a75f; } /* Light brown/tan text */
+    .brown-balance .balance-amount{ color: #b8860b; font-size: 32px; } /* DarkGoldenrod for amount */
+
+
     .content{ padding:16px; }
 
     .section-title{
@@ -410,11 +423,6 @@
         <button class="hdr-btn" onclick="showMenu()">মেনু</button>
       </div>
 
-      <div class="balance">
-        <h2>ব্যালেন্স</h2>
-        <div class="balance-amount" id="ads-balance">০.০০ ৳</div>
-      </div>
-
       <div class="content">
         <div class="tutorial-notice">
             <div class="note">
@@ -460,6 +468,11 @@
         <button class="hdr-btn" onclick="showScreen('home-screen')">ফিরে যান</button>
         <div class="title">টেলিগ্রাম কাজ</div>
         <button class="hdr-btn" onclick="showMenu()">মেনু</button>
+      </div>
+      
+      <div class="balance brown-balance"> 
+        <h2>ব্যালেন্স</h2>
+        <div class="balance-amount" id="tg-balance">০.০০ ৳</div>
       </div>
 
       <div class="content center">
