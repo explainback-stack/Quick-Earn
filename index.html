@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Task Rewards — Quick Earn</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
     :root{
       --bg: #0b0f17;
@@ -60,7 +61,49 @@
     }
     .hdr-btn:hover{ transform:translateY(-1px); background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.22) }
 
-    /* Balance */
+    /* New styles for Profile Header */
+    .profile-header {
+        background: linear-gradient(135deg, #101826 0%, #0e1522 100%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 16px;
+    }
+    .profile-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .profile-info img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 3px solid var(--brand);
+        object-fit: cover;
+        background: var(--card-2);
+    }
+    .user-details h1 {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .verified-icon {
+        color: var(--brand-2); 
+        font-size: 14px;
+    }
+    .user-details p {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 600;
+    }
+    .user-details #user-points {
+        font-size: 14px;
+        color: var(--accent);
+        font-weight: 800;
+    }
+    
+    /* Balance (kept for other screens) */
     .balance{
       margin:16px; border-radius:20px; padding:18px 16px;
       background:
@@ -304,11 +347,15 @@
         <button class="hdr-btn" onclick="showMenu()">মেনু</button>
       </div>
 
-      <div class="balance">
-        <h2>ব্যালেন্স</h2>
-        <div class="balance-amount" id="balance">০.০০ ৳</div>
-      </div>
-
+      <header class="profile-header">
+          <div class="profile-info">
+              <img id="user-photo" src="" alt="User Photo" onerror="this.src='https://via.placeholder.com/60'">
+              <div class="user-details">
+                  <h1 id="user-name">Loading... <i class="fas fa-check-circle verified-icon"></i></h1>
+                  <p>Balance: <span id="user-points">0</span> ৳</p>
+              </div>
+          </div>
+      </header>
       <div class="content">
         <div class="section-title">দৈনিক চেক-ইন বোনাস</div>
         <div class="note">
@@ -352,7 +399,19 @@
       </div>
 
       <div class="content">
-        <div class="section-title">বিজ্ঞাপনের কাজ</div>
+        <div class="tutorial-notice">
+            <div class="note">
+                📢 টিউটোরিয়াল ভিডিও নোটিশ
+                <br>
+                কিভাবে অ্যাপটি ব্যবহার করবেন তা বুঝতে সমস্যা হলে চিন্তার কিছু নেই!
+                <br>
+                নিচের টিউটোরিয়াল ভিডিও দেখে নিন এবং খুব সহজেই আয় করা শুরু করুন।
+            </div>
+            <button class="btn btn-secondary mt-8" onclick="window.open('https://youtu.be/53QHaGaScZg?si=rVaaBvKvcopSiSHm', '_blank')">
+                ▶ টিউটোরিয়াল ভিডিও দেখুন
+            </button>
+        </div>
+        <div class="section-title mt-16">বিজ্ঞাপনের কাজ</div>
         <div class="note">বিজ্ঞাপন দেখে টাকা আয় করুন। প্রতিদিনের সীমা প্রযোজ্য।</div>
 
         <div class="grid">
@@ -604,11 +663,27 @@
     // Format to BDT/Taka (৳), ensuring two decimal places
     const fmt = (n) => (Math.round((Number(n)||0)*100)/100).toFixed(2).toLocaleString('bn-BD');
 
+    function byId(id){ return document.getElementById(id) }
+    function setText(id, val){ const el = byId(id); if(el) el.textContent = val; }
+
+
     function updateBalances(){
+      // Update balance on the new Home Screen profile header
+      const userPointsEl = byId('user-points');
+      if(userPointsEl) userPointsEl.textContent = fmt(userData.balance);
+
+      // Update balance on other screens (ads, tg, withdraw, profile)
       document.querySelectorAll('.balance-amount').forEach(el=>{
         el.textContent = fmt(userData.balance) + ' ৳';
       });
     }
+
+    function updateProfileHeader() {
+        const userNameEl = byId('user-name');
+        // Set user ID as the display name with the icon
+        if(userNameEl) userNameEl.innerHTML = `${userData.userId} <i class="fas fa-check-circle verified-icon"></i>`;
+    }
+
     function updateStats(){
       byId('total-earned').textContent = fmt(userData.totalEarnings);
       byId('p-total-earned').textContent = fmt(userData.totalEarnings);
@@ -630,6 +705,7 @@
       updateBalances();
       updateStats();
       updateTaskCounts();
+      updateProfileHeader(); // Update the new profile header
     }
 
     function updateReferralWarning(){
@@ -860,10 +936,6 @@ Date: ${new Date().toLocaleString()}`);
         userData.welcomeModalShown = true; 
         saveUserData();
     }
-
-    // ------- Utilities -------
-    function byId(id){ return document.getElementById(id) }
-    function setText(id, val){ const el = byId(id); if(el) el.textContent = val; }
 
     // ------- New Loading Text Animation Function -------
     function startLoadingMessageAnimation() {
