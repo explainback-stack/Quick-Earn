@@ -177,21 +177,66 @@
     .center{ text-align:center }
     .mt-8{ margin-top:8px } .mt-12{ margin-top:12px } .mt-16{ margin-top:16px } .mt-20{ margin-top:20px }
 
-    /* New styles for Loading Animation */
+    /* New styles for Loading Animation (Updated as requested) */
     .loading-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: var(--bg); z-index: 9999;
+        /* Requested Black and Blue Gradient Background */
+        background: linear-gradient(135deg, #0f101a 0%, #002c4b 100%); 
+        z-index: 9999;
         display: flex; justify-content: center; align-items: center;
         flex-direction: column; opacity: 1; transition: opacity 0.5s ease-out;
+        overflow: hidden; 
     }
     .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    
+    /* Updated Spinner */
     .loading-spinner {
-        width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.2);
-        border-top-color: var(--brand); border-radius: 50%;
-        animation: spin 1.5s linear infinite;
+        width: 60px; height: 60px; border: 6px solid rgba(124, 92, 255, 0.2);
+        border-top-color: var(--brand-2); border-radius: 50%;
+        animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        box-shadow: 0 0 10px rgba(0, 224, 184, 0.5);
     }
-    .loading-text { margin-top: 16px; font-size: 16px; font-weight: 600; color: var(--text); }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    /* Bouncing Logo Text */
+    .loading-logo {
+        margin-top: 20px; font-size: 24px; font-weight: 800; 
+        color: var(--text); text-shadow: 0 0 15px rgba(124, 92, 255, 0.8);
+        animation: bounce 1.5s infinite;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+    }
+    .loading-logo .emoji { font-size: 28px; margin: 0 5px; animation: bounce 1.5s infinite; }
+    .loading-logo .text { 
+        background-image: linear-gradient(90deg, var(--brand), var(--brand-2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 5px;
+        font-family: 'Times New Roman', Times, serif; 
+    }
+
+    /* Snow Animation (Removed as requested) */
+    .loading-overlay::before, .loading-overlay::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        /* Backgrounds removed */
+    }
+    
+    @keyframes spin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.1); } 100% { transform: rotate(360deg) scale(1); } }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-10px);}
+        60% {transform: translateY(-5px);}
+    }
+
+    /* Snow animation removed */
+
 
     /* New styles for Modal */
     .modal-overlay {
@@ -225,7 +270,13 @@
   
   <div class="loading-overlay" id="loading-screen">
     <div class="loading-spinner"></div>
-    <div class="loading-text">Loading Your Dashboard</div>
+    <div class="loading-logo">
+        <span class="emoji">𝐐</span>
+        <span class="text">𝐮𝐢𝐜𝐤 𝐄𝐚𝐫𝐧</span>
+        <span class="emoji">💸</span> 
+        <span class="text"> - দ্রুত আয় </span>
+        <span class="emoji">💸</span>
+    </div>
   </div>
 
   <div class="modal-overlay" id="welcome-modal">
@@ -506,6 +557,7 @@
     const TELEGRAM_CHANNEL_1 = "https://t.me/Quick_Earn_Accouncment24";
     const TELEGRAM_CHANNEL_2 = "https://t.me/Quick_Earn_Official_Channel";
     const BOT_LINK = "http://t.me/quick_earn_io_bot?start=";
+    const LOADING_TIME = 2000; // Updated: 2 seconds loading time
 
     // ------- State -------
     let userData = {
@@ -524,7 +576,7 @@
       lastTaskTime: null,
       telegramVerified1: false,
       telegramVerified2: false,
-      welcomeModalShown: false // New state for modal
+      welcomeModalShown: false // Keeping the state, but not using it for the requested behaviour
     };
 
     function generateUserId(){ return 'USER' + Math.floor(100000 + Math.random()*900000) }
@@ -706,28 +758,18 @@
 
       // Check for first-time claim to give Join Bonus
       const isFirstClaim = userData.currentStreak === 0 && !userData.lastCheckin;
-      const reward = isFirstClaim ? DAILY_CHECKIN_REWARD : 5; // Revert to a smaller daily reward after the first claim if needed, or keep it at 25. For now, let's keep it at 25 for all claims per the pop-up text "জয়েন বোনাস: ২৫ টাকা" which we're treating as the first check-in bonus. For simplicity and consistency with the pop-up, we'll keep the first claim at 25 and block subsequent claims for the day.
-
-      if(isFirstClaim) {
-          userData.balance += DAILY_CHECKIN_REWARD;
-          userData.totalEarnings += DAILY_CHECKIN_REWARD;
-      } else {
-          // If a daily check-in reward beyond the join bonus is intended, adjust here.
-          // For simplicity, we are blocking re-claims today.
-          // If you want a small daily bonus after the big join bonus, you'd implement that logic here.
-          // Example: userData.balance += 5; // for subsequent days
-          userData.balance += DAILY_CHECKIN_REWARD; // Sticking to 25 Taka for all daily claims for now
-          userData.totalEarnings += DAILY_CHECKIN_REWARD;
-      }
+      const reward = DAILY_CHECKIN_REWARD; 
 
 
+      userData.balance += reward;
+      userData.totalEarnings += reward;
       userData.lastCheckin = today;
       userData.currentStreak++;
 
       updateAll(); saveUserData();
 
       if(btn){ btn.textContent='আগামীকাল আবার আসুন'; btn.disabled = true; }
-      alert(`দৈনিক পুরস্কার দাবি করা হয়েছে! আপনি ${fmt(DAILY_CHECKIN_REWARD)} ৳ আয় করেছেন।`);
+      alert(`দৈনিক পুরস্কার দাবি করা হয়েছে! আপনি ${fmt(reward)} ৳ আয় করেছেন।`);
     }
 
 
@@ -808,16 +850,15 @@ Date: ${new Date().toLocaleString()}`);
         alert("রেফারেল লিঙ্ক কপি করা হয়েছে!");
     }
 
-    // ------- Modal Functions -------
+    // ------- Modal Functions (Modified to always show) -------
     function showWelcomeModal() {
-        if (!userData.welcomeModalShown) {
-            byId('welcome-modal').style.display = 'flex';
-        }
+        // Removed the check for userData.welcomeModalShown so it shows every time.
+        byId('welcome-modal').style.display = 'flex';
     }
 
     function closeModal() {
         byId('welcome-modal').style.display = 'none';
-        userData.welcomeModalShown = true;
+        userData.welcomeModalShown = true; // Still mark as shown for a future change if needed
         saveUserData();
     }
 
@@ -857,10 +898,10 @@ Date: ${new Date().toLocaleString()}`);
         updateReferralWarning();
         updateTelegramButtons();
 
-        // Show Welcome Modal after load
+        // Show Welcome Modal after load (always shows now)
         showWelcomeModal();
 
-      }, 6500); // 6.5 seconds loading time
+      }, LOADING_TIME); // Use configured loading time
     }
 
     // Events
