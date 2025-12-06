@@ -177,7 +177,7 @@
     .center{ text-align:center }
     .mt-8{ margin-top:8px } .mt-12{ margin-top:12px } .mt-16{ margin-top:16px } .mt-20{ margin-top:20px }
 
-    /* New styles for Loading Animation (Updated as requested) */
+    /* New styles for Loading Animation */
     .loading-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         /* Requested Black and Blue Gradient Background */
@@ -215,16 +215,17 @@
         font-family: 'Times New Roman', Times, serif; 
     }
 
-    /* Snow Animation (Removed as requested) */
-    .loading-overlay::before, .loading-overlay::after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        pointer-events: none;
-        /* Backgrounds removed */
+    /* Additional text for loading */
+    .loading-message {
+        margin-top: 15px; 
+        font-size: 16px; 
+        font-weight: 600;
+        color: var(--muted);
+        min-height: 20px; /* To prevent layout shift */
+        transition: color 0.5s ease-in-out;
+    }
+    .loading-message.highlight {
+        color: var(--brand-2);
     }
     
     @keyframes spin { 0% { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.1); } 100% { transform: rotate(360deg) scale(1); } }
@@ -234,8 +235,6 @@
         40% {transform: translateY(-10px);}
         60% {transform: translateY(-5px);}
     }
-
-    /* Snow animation removed */
 
 
     /* New styles for Modal */
@@ -277,6 +276,7 @@
         <span class="text"> - দ্রুত আয় </span>
         <span class="emoji">💸</span>
     </div>
+    <div class="loading-message" id="loading-message"></div>
   </div>
 
   <div class="modal-overlay" id="welcome-modal">
@@ -549,15 +549,15 @@
   <script>
     // ------- Config (BDT version) -------
     const DAILY_ADS_LIMIT = 20;               // প্রতিদিন ২০টি অ্যাড
-    const AD_REWARD_AMOUNT = 10;              // প্রতি অ্যাড-এ ১০ টাকা (Updated from 6)
-    const DAILY_CHECKIN_REWARD = 25;          // দৈনিক চেক-ইন-এ ২৫ টাকা (Updated from 5 as Join Bonus)
+    const AD_REWARD_AMOUNT = 10;              // প্রতি অ্যাড-এ ১০ টাকা
+    const DAILY_CHECKIN_REWARD = 25;          // দৈনিক চেক-ইন-এ ২৫ টাকা
     const MIN_WITHDRAWAL = 600;               // সর্বনিম্ন উত্তোলন ৬০০ টাকা
-    const REQUIRED_REFERRALS = 10;            // উত্তোলনের জন্য ১০ জন রেফারেল (Updated from 6)
+    const REQUIRED_REFERRALS = 10;            // উত্তোলনের জন্য ১০ জন রেফারেল
     const TELEGRAM_BONUS = 10;                // প্রতি চ্যানেল জয়েন-এ ১০ টাকা
     const TELEGRAM_CHANNEL_1 = "https://t.me/Quick_Earn_Accouncment24";
     const TELEGRAM_CHANNEL_2 = "https://t.me/Quick_Earn_Official_Channel";
     const BOT_LINK = "http://t.me/quick_earn_io_bot?start=";
-    const LOADING_TIME = 2000; // Updated: 2 seconds loading time
+    const LOADING_TIME = 8000; // Updated: 8 seconds loading time (8000ms)
 
     // ------- State -------
     let userData = {
@@ -576,7 +576,7 @@
       lastTaskTime: null,
       telegramVerified1: false,
       telegramVerified2: false,
-      welcomeModalShown: false // Keeping the state, but not using it for the requested behaviour
+      welcomeModalShown: false 
     };
 
     function generateUserId(){ return 'USER' + Math.floor(100000 + Math.random()*900000) }
@@ -852,13 +852,12 @@ Date: ${new Date().toLocaleString()}`);
 
     // ------- Modal Functions (Modified to always show) -------
     function showWelcomeModal() {
-        // Removed the check for userData.welcomeModalShown so it shows every time.
         byId('welcome-modal').style.display = 'flex';
     }
 
     function closeModal() {
         byId('welcome-modal').style.display = 'none';
-        userData.welcomeModalShown = true; // Still mark as shown for a future change if needed
+        userData.welcomeModalShown = true; 
         saveUserData();
     }
 
@@ -866,6 +865,33 @@ Date: ${new Date().toLocaleString()}`);
     function byId(id){ return document.getElementById(id) }
     function setText(id, val){ const el = byId(id); if(el) el.textContent = val; }
 
+    // ------- New Loading Text Animation Function -------
+    function startLoadingMessageAnimation() {
+        const messageEl = byId('loading-message');
+        const messages = [
+            "Dashboard loading", 
+            "Id verification loading", 
+            "Refferal detector loading",
+            "সবকিছু প্রস্তুত! একটু অপেক্ষা করুন..."
+        ];
+        const totalDuration = LOADING_TIME;
+        const interval = totalDuration / messages.length;
+        let index = 0;
+
+        function updateMessage() {
+            if (index < messages.length) {
+                messageEl.textContent = messages[index];
+                messageEl.classList.add('highlight'); // Highlight effect
+                setTimeout(() => {
+                    messageEl.classList.remove('highlight');
+                }, 500); // Remove highlight after 0.5s
+                index++;
+                setTimeout(updateMessage, interval);
+            }
+        }
+
+        updateMessage();
+    }
     // ------- App Initialization -------
     function initApp(){
       loadUserData();
@@ -875,6 +901,9 @@ Date: ${new Date().toLocaleString()}`);
       const mainApp = byId('app');
       loadingScreen.classList.remove('hidden');
       mainApp.style.display = 'none';
+
+      // Start the loading message animation
+      startLoadingMessageAnimation();
 
       setTimeout(() => {
         // Hide Loading Screen and Show Main App
