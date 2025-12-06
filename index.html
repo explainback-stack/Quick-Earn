@@ -490,7 +490,13 @@
           <button class="btn" onclick="window.open('https://t.me/Quick_Earn_Official_Channel','_blank')">চ্যানেল ২ খুলুন</button>
           <button class="btn btn-secondary" onclick="verifyTelegram(2)" id="verify-btn-2">যোগদান যাচাই করুন (+১০ ৳)</button>
         </div>
-      </div>
+        
+        <div class="mt-20">
+          <p class="mt-8">অফিসিয়াল ইউটিউব চ্যানেলে সাবস্ক্রাইব করুন:</p>
+          <button class="btn" onclick="window.open('https://youtube.com/channel/UC0UybTLky3ZSAnnvN1q1tiQ?si=ZsQ6sLzY18iJHPF4','_blank')">ইউটিউব চ্যানেল খুলুন</button>
+          <button class="btn btn-secondary" onclick="verifyYouTube()" id="verify-btn-youtube">সাবস্ক্রিপশন যাচাই করুন (+১০ ৳)</button>
+        </div>
+        </div>
     </div>
 
     <div id="withdraw-screen" class="screen">
@@ -660,6 +666,7 @@
       lastTaskTime: null,
       telegramVerified1: false,
       telegramVerified2: false,
+      youtubeVerified: false, // <-- ADDED for the new YouTube task
       welcomeModalShown: false 
     };
 
@@ -673,6 +680,7 @@
           userData = { ...userData, ...JSON.parse(saved) };
           // Ensure new fields are initialized if loaded data is old
           if(userData.welcomeModalShown === undefined) userData.welcomeModalShown = false;
+          if(userData.youtubeVerified === undefined) userData.youtubeVerified = false; // <-- ADDED check for new field
         }
       }catch(e){
         console.error('Load error', e);
@@ -701,8 +709,6 @@
       });
     }
 
-    // REMOVED updateProfileHeader function
-
     function updateStats(){
       byId('total-earned').textContent = fmt(userData.totalEarnings);
       byId('p-total-earned').textContent = fmt(userData.totalEarnings);
@@ -724,7 +730,6 @@
       updateBalances();
       updateStats();
       updateTaskCounts();
-      // REMOVED updateProfileHeader call
     }
 
     function updateReferralWarning(){
@@ -737,6 +742,7 @@
     function updateTelegramButtons(){
       const tgBtn1 = byId('verify-btn-1');
       const tgBtn2 = byId('verify-btn-2');
+      const ytBtn = byId('verify-btn-youtube'); // <-- NEW YouTube button
 
       if(tgBtn1){
         if(userData.telegramVerified1){
@@ -754,6 +760,17 @@
         }else{
           tgBtn2.disabled = false;
           tgBtn2.textContent = `যোগদান যাচাই করুন (+${fmt(TELEGRAM_BONUS)} ৳)`;
+        }
+      }
+      
+      // NEW YouTube Button Logic
+      if(ytBtn){
+        if(userData.youtubeVerified){
+          ytBtn.disabled = true;
+          ytBtn.textContent = 'ইতিমধ্যে যাচাই করা হয়েছে';
+        }else{
+          ytBtn.disabled = false;
+          ytBtn.textContent = `সাবস্ক্রিপশন যাচাই করুন (+${fmt(TELEGRAM_BONUS)} ৳)`;
         }
       }
     }
@@ -896,6 +913,24 @@
       updateAll(); saveUserData(); updateTelegramButtons();
       alert(`চ্যানেল ${channelNum} যাচাই করা হয়েছে! আপনি ${fmt(TELEGRAM_BONUS)} ৳ আয় করেছেন।`);
     }
+    
+    // ------- YouTube verify (NEW function) -------
+    function verifyYouTube(){
+      if(userData.youtubeVerified){
+        alert('আপনি এই চ্যানেলটি ইতিমধ্যে যাচাই করেছেন।'); return;
+      }
+
+      const bonus = TELEGRAM_BONUS; // Using the same bonus amount 
+      
+      // simple client-side verify action (no API) — awards once
+      userData.balance += bonus;
+      userData.totalEarnings += bonus;
+      userData.youtubeVerified = true;
+
+      updateAll(); saveUserData(); updateTelegramButtons(); 
+      alert(`ইউটিউব চ্যানেল যাচাই করা হয়েছে! আপনি ${fmt(bonus)} ৳ আয় করেছেন।`);
+    }
+
 
     // ------- Withdraw -------
     function requestWithdrawal(){
@@ -1016,7 +1051,7 @@ Date: ${new Date().toLocaleString()}`);
         updateAll();
         checkTaskAvailability();
         updateReferralWarning();
-        updateTelegramButtons();
+        updateTelegramButtons(); // This now updates Telegram AND YouTube buttons
 
         // Show Welcome Modal after load (always shows now)
         showWelcomeModal();
